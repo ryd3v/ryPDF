@@ -34,6 +34,31 @@ class PDFReader(QMainWindow):
         self.setStyleSheet("background-color: #18181b;")
 
         toolbar = QToolBar("Main")
+        toolbar.setStyleSheet("""
+            QToolBar {
+                background-color: #18181b;
+                color: #e4e4e7;
+                
+            }
+    
+            QToolButton {
+                border: none;
+                padding: 1px;
+                border-radius: 6px;
+            }
+            
+            QToolButton:hover {
+                background-color: #3b82f6;
+            }
+            
+            QToolButton:pressed {
+                background-color: #292524;
+            }
+            
+            QToolButton:checked {
+                background-color: #444444;
+            }
+        """)
         self.addToolBar(toolbar)
 
         open_pdf_action = QAction('File', self)
