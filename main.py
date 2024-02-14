@@ -1,20 +1,44 @@
 import pdfplumber
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QFileDialog
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QFont, QAction
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QTextEdit, QFileDialog, QToolBar, QWidget
 
 
-class PDFReader(QWidget):
+class PdfWorker(QThread):
+    # Signal to send pdf text to GUI thread
+    send_pdf_text = pyqtSignal(str)
+
+    def __init__(self, path, parent=None):
+        super().__init__(parent)
+        self.path = path
+
+    def run(self):
+        with pdfplumber.open(self.path) as pdf:
+            content = ""
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    content += page_text + "\n"
+            self.send_pdf_text.emit(content)
+
+
+class PDFReader(QMainWindow):
     def __init__(self):
         super().__init__()
 
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle('ryPDF')
-        self.setGeometry(100, 100, 600, 900)
-        self.setStyleSheet("background-color: #09090b;")
-        app.setStyle("Fusion")
+        self.setWindowTitle('PDF Reader')
+        self.setGeometry(100, 100, 700, 900)
+        self.setStyleSheet("background-color: #18181b;")
+
+        toolbar = QToolBar("Main")
+        self.addToolBar(toolbar)
+
+        open_pdf_action = QAction('File', self)
+        open_pdf_action.triggered.connect(self.open_pdf)
+        toolbar.addAction(open_pdf_action)
 
         self.text_edit = QTextEdit()
         self.text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -23,32 +47,27 @@ class PDFReader(QWidget):
         text_font = QFont("Roboto", 12)
         self.text_edit.setFont(text_font)
 
-        self.button = QPushButton('Open PDF')
-        self.button.clicked.connect(self.open_pdf)
-
         layout = QVBoxLayout()
         layout.addWidget(self.text_edit)
-        layout.addWidget(self.button)
 
-        self.setLayout(layout)
+        central_widget = QWidget()
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
 
     def open_pdf(self):
-        # Get file using file dialog
-        path, _ = QFileDialog.getOpenFileName(self, "Open PDF", "", "PDF files (*.pdf)")
+        path, _ = QFileDialog.getOpenFileName(self, "File", "", "PDF Files (*.pdf)")
 
         if path:
-            # Use PDFPlumber to load and read PDF
-            with pdfplumber.open(path) as pdf:
-                content = ""
+            self.text_edit.setPlaceholderText("Loading...")
 
-                # Iterate through pdf pages
-                for page in pdf.pages:
-                    # Extract text
-                    page_text = page.extract_text()
-                    content += page_text if page_text else ""
+            self.pdf_worker = PdfWorker(path)
+            self.pdf_worker.send_pdf_text.connect(self.update_text)
+            self.pdf_worker.finished.connect(self.pdf_worker.deleteLater)
+            self.pdf_worker.start()
 
-                # Set the text in the QTextEdit widget
-                self.text_edit.setText(content)
+    def update_text(self, text):
+        self.text_edit.setPlainText(text)
+        self.text_edit.setPlaceholderText("")
 
 
 app = QApplication([])
