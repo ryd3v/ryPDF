@@ -1,6 +1,6 @@
 import pdfplumber
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QFont, QAction
+from PyQt6.QtGui import QFont, QAction, QPalette, QColor
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QTextEdit, QFileDialog, QToolBar, QWidget
 
 
@@ -84,6 +84,9 @@ class PDFReader(QMainWindow):
 
         if path:
             self.text_edit.setPlaceholderText("Loading...")
+            palette = self.text_edit.palette()
+            palette.setColor(QPalette.ColorRole.PlaceholderText, QColor("#3b82f6"))
+            self.text_edit.setPalette(palette)
 
             self.pdf_worker = PdfWorker(path)
             self.pdf_worker.send_pdf_text.connect(self.update_text)
