@@ -1,5 +1,6 @@
 import pdfplumber
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit, QFileDialog
 
 
@@ -19,6 +20,8 @@ class PDFReader(QWidget):
         self.text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.text_edit.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.text_edit.setReadOnly(True)
+        text_font = QFont("Roboto", 12)
+        self.text_edit.setFont(text_font)
 
         self.button = QPushButton('Open PDF')
         self.button.clicked.connect(self.open_pdf)
