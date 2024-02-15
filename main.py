@@ -1,7 +1,7 @@
-import pdfplumber
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont, QAction, QPalette, QColor
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QTextEdit, QFileDialog, QToolBar, QWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFileDialog, QToolBar, QWidget, \
+    QTextBrowser
 
 
 class PdfWorker(QThread):
@@ -13,13 +13,13 @@ class PdfWorker(QThread):
         self.path = path
 
     def run(self):
-        with pdfplumber.open(self.path) as pdf:
-            content = ""
-            for page in pdf.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    content += page_text + "\n"
-            self.send_pdf_text.emit(content)
+        import fitz  # PyMuPDF
+        doc = fitz.open(self.path)
+        content = ""
+        for i in range(len(doc)):
+            page = doc.load_page(i)
+            content += page.get_text("html") + "\n"
+        self.send_pdf_text.emit(content)
 
 
 class PDFReader(QMainWindow):
@@ -40,7 +40,7 @@ class PDFReader(QMainWindow):
                 color: #e4e4e7;
                 
             }
-    
+                            
             QToolButton {
                 border: none;
                 padding: 1px;
@@ -65,7 +65,9 @@ class PDFReader(QMainWindow):
         open_pdf_action.triggered.connect(self.open_pdf)
         toolbar.addAction(open_pdf_action)
 
-        self.text_edit = QTextEdit()
+        # self.text_edit = QTextEdit()
+        self.text_edit = QTextBrowser()
+        self.text_edit.setOpenExternalLinks(True)
         self.text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.text_edit.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.text_edit.setReadOnly(True)
@@ -94,7 +96,8 @@ class PDFReader(QMainWindow):
             self.pdf_worker.start()
 
     def update_text(self, text):
-        self.text_edit.setPlainText(text)
+        # self.text_edit.setPlainText(text)
+        self.text_edit.setHtml(text)
         self.text_edit.setPlaceholderText("")
 
 
