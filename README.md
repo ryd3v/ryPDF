@@ -2,6 +2,8 @@
 
 Welcome to my PDF Reader, a simple and handy tool written in Python. The tool allows you to open and read .pdf files, displaying them as rich text along with images and tables in a user-friendly interface.
 
+![ALT](./Screenshot.png)
+
 ## Features
 
 - Open and read .pdf files
