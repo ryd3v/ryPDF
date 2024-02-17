@@ -1,7 +1,7 @@
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont, QAction, QPalette, QColor
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFileDialog, QToolBar, QWidget, \
-    QTextBrowser
+    QTextBrowser, QStyleFactory
 
 
 class PdfWorker(QThread):
@@ -29,6 +29,7 @@ class PDFReader(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
+
         self.setWindowTitle('PDF Reader')
         self.setGeometry(100, 100, 700, 900)
         self.setStyleSheet("background-color: #18181b;")
@@ -102,6 +103,7 @@ class PDFReader(QMainWindow):
 
 
 app = QApplication([])
+app.setStyle(QStyleFactory.create("Fusion"))
 window = PDFReader()
 window.show()
 app.exec()
