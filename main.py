@@ -1,11 +1,14 @@
+import os
+
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QFont, QAction, QPalette, QColor
+from PyQt6.QtGui import QFont, QAction, QPalette, QColor, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QFileDialog, QToolBar, QWidget, \
     QTextBrowser, QStyleFactory
 
+logo_path = os.path.join(os.path.dirname(__file__), 'icon.ico')
+
 
 class PdfWorker(QThread):
-    # Signal to send pdf text to GUI thread
     send_pdf_text = pyqtSignal(str)
 
     def __init__(self, path, parent=None):
@@ -13,7 +16,7 @@ class PdfWorker(QThread):
         self.path = path
 
     def run(self):
-        import fitz  # PyMuPDF
+        import fitz
         doc = fitz.open(self.path)
         content = ""
         for i in range(len(doc)):
@@ -29,7 +32,6 @@ class PDFReader(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-
         self.setWindowTitle('PDF Reader')
         self.setGeometry(100, 100, 700, 900)
         self.setStyleSheet("background-color: #18181b;")
@@ -44,16 +46,11 @@ class PDFReader(QMainWindow):
                             
             QToolButton {
                 border: none;
-                padding: 1px;
-                border-radius: 6px;
+                border-radius: 4px;
             }
             
             QToolButton:hover {
-                background-color: #3b82f6;
-            }
-            
-            QToolButton:pressed {
-                background-color: #292524;
+                background-color: #3f3f46;
             }
             
             QToolButton:checked {
@@ -103,7 +100,9 @@ class PDFReader(QMainWindow):
 
 
 app = QApplication([])
+app_icon = QIcon(logo_path)
 app.setStyle(QStyleFactory.create("Fusion"))
 window = PDFReader()
+window.setWindowIcon(app_icon)
 window.show()
 app.exec()
